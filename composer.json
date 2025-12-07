@@ -3,6 +3,7 @@
     "description": "Felora lightweight core",
     "type": "library",
     "license": "MIT",
+    "version": "0.1.0-beta",
     "autoload": {
         "psr-4": {
             "Felora\\": "src/"
