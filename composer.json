@@ -1,0 +1,28 @@
+{
+    "name": "feloraf/felora",
+    "description": "Felora lightweight core",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Felora\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "tests": "phpunit tests/"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "symfony/var-dumper": "^8.0"
+    },
+    "authors": [
+        {
+            "name": "Felora.dev"
+        }
+    ]
+}
