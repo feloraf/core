@@ -3,12 +3,12 @@
 namespace Felora\Container;
 
 use Exception;
-use Felora\Contracts\Container\ContainerContracts;
+use Felora\Contracts\Container\Container as ContainerContract;
 
 /**
  * Minimal IoC Container (bind, singleton, make)
  */
-class Container implements ContainerContracts
+class Container implements ContainerContract
 {
     /** @var array<string, \Closure|string> Bindings storage */
     private static array $bindings = [];

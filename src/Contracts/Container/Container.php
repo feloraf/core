@@ -2,7 +2,7 @@
 
 namespace Felora\Contracts\Container;
 
-interface ContainerContracts
+interface Container
 {
     public function make(string $abstract, array $parameters = []);
 

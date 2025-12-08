@@ -2,12 +2,12 @@
 declare(strict_types=1);
 
 use Felora\Container\Container;
-use Felora\Contracts\Container\ContainerContracts;
+use Felora\Contracts\Container\Container as ContainerContract;
 use Tests\TestCase;
 
 class ContainerBindTest extends TestCase
 {
-    private ContainerContracts $container;
+    private ContainerContract $container;
 
     public function setUp(): void
     {
@@ -30,7 +30,7 @@ class ContainerBindTest extends TestCase
             return new Monolog();
         });
 
-        $this->container->bind(Logging::class, function (ContainerContracts $c) {
+        $this->container->bind(Logging::class, function (ContainerContract $c) {
             return new Logging($c->make(Monolog::class));
         });
 
@@ -66,7 +66,7 @@ class ContainerBindTest extends TestCase
             return new Monolog();
         });
 
-        $this->container->bind(ServiceUsingMonolog::class, function (ContainerContracts $c) {
+        $this->container->bind(ServiceUsingMonolog::class, function (ContainerContract $c) {
             return new ServiceUsingMonolog($c->make(Monolog::class));
         });
 

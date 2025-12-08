@@ -2,12 +2,12 @@
 declare(strict_types=1);
 
 use Felora\Container\Container;
-use Felora\Contracts\Container\ContainerContracts;
+use Felora\Contracts\Container\Container as ContainerContract;
 use Tests\TestCase;
 
 class ContainerSingletonTest extends TestCase
 {
-    private ContainerContracts $container;
+    private ContainerContract $container;
 
     public function setUp(): void
     {
