@@ -2,8 +2,10 @@
 
 namespace Felora\Container;
 
+use Closure;
 use Exception;
 use Felora\Contracts\Container\Container as ContainerContract;
+use ReflectionFunction;
 
 /**
  * Minimal IoC Container (bind, singleton, make)
@@ -145,7 +147,7 @@ class Container implements ContainerContract
 
         if (is_callable($concrete)) {
             // Execute closure with container passed
-            $instance = $concrete($this);
+            $instance = $this->resolveCallback($concrete, $parameters);
         } elseif (is_string($concrete)) {
             if (!class_exists($concrete)) {
                 // Concrete is a string value, return as-is
@@ -166,6 +168,46 @@ class Container implements ContainerContract
         }
 
         return $instance;
+    }
+
+    /**
+     * Resolve and execute a bound closure, injecting the container and parameters
+     * when necessary.
+     *
+     * @param Closure $concrete   The closure representing the binding.
+     * @param array   $parameters Parameters passed from make() to be injected into the closure.
+     * @return mixed The resolved value returned by the closure.
+     * @throws Exception If the first parameter of the closure is type-hinted incorrectly.
+     */
+    private function resolveCallback(Closure $concrete, array $parameters)
+    {
+        $reflection = new ReflectionFunction($concrete);
+        $paramCount = $reflection->getNumberOfParameters();
+
+        if ($paramCount === 0) {
+            return $concrete();
+        }
+
+        $firstParam = $reflection->getParameters()[0];
+        $firstParamType = $firstParam->getType();
+
+        if (
+            $firstParamType !== null &&
+            $firstParamType->getName() !== ContainerContract::class
+        ) {
+            throw new Exception(
+                sprintf(
+                    "The first parameter of the bind closure must be type-hinted as %s.",
+                    ContainerContract::class
+                )
+            );
+        }
+
+        if ($paramCount === 1) {
+            return $concrete($this);
+        }
+
+        return $concrete($this, $parameters);
     }
 
     // -----------------------------

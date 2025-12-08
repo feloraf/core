@@ -102,6 +102,74 @@ class ContainerBindTest extends TestCase
         $this->assertInstanceOf(LoggerInterface::class, $resolved);
         $this->assertInstanceOf(Monolog::class, $resolved);
     }
+
+    public function test_closure_bind_receives_params_in_make_call(): void
+    {
+        $this->container->bind('sum', function (ContainerContract $c, array $params) {
+            return $params['a'] + $params['b'];
+        });
+
+        $result = $this->container->make('sum', ['a' => 3, 'b' => 7]);
+
+        $this->assertSame(10, $result);
+    }
+
+    public function test_closure_bind_params_are_optional_and_can_have_defaults(): void
+    {
+        $this->container->bind('greet', function (ContainerContract $c, array $params) {
+            $name = $params['name'] ?? 'Guest';
+            return "Hello, {$name}";
+        });
+
+        $this->assertSame('Hello, Ali', $this->container->make('greet', ['name' => 'Ali']));
+        $this->assertSame('Hello, Guest', $this->container->make('greet'));
+    }
+
+    public function test_closure_bind_can_mix_auto_injection_and_params(): void
+    {
+        $this->container->bind(SimpleService::class, function () {
+            return new SimpleService();
+        });
+
+        $this->container->bind('complex', function (ContainerContract $c, array $params) {
+            $service = $c->make(SimpleService::class);
+            return $service->say() . ' - ' . $params['extra'];
+        });
+
+        $result = $this->container->make('complex', ['extra' => 'done']);
+
+        $this->assertSame('ok - done', $result);
+    }
+
+    public function test_closure_with_invalid_first_parameter_type_throws_exception(): void
+    {
+        $this->container->bind('bad', function (int $wrong) {
+            return 'fail';
+        });
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('The first parameter of the bind closure must be type-hinted');
+
+        $this->container->make('bad');
+    }
+
+    public function test_closure_with_only_container_parameter_receives_only_container(): void
+    {
+        $this->container->bind('onlyContainer', function (ContainerContract $c) {
+            return $c instanceof ContainerContract;
+        });
+
+        $this->assertTrue($this->container->make('onlyContainer'));
+    }
+
+    public function test_closure_with_no_typehint_on_first_parameter_is_allowed(): void
+    {
+        $this->container->bind('noType', function ($c) {
+            return $c instanceof ContainerContract;
+        });
+
+        $this->assertTrue($this->container->make('noType'));
+    }
 }
 
 interface LoggerInterface {}
