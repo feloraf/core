@@ -53,7 +53,6 @@ class ContainerSingletonTest extends TestCase
         $this->container->make('counter_test');
         $this->container->make('counter_test');
 
-        // closure باید فقط یکبار اجرا شده باشد
         $this->assertEquals(1, $counter);
     }
 
