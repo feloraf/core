@@ -18,6 +18,9 @@ class Container implements ContainerContract
     /** @var string[] Shared (singleton) identifiers */
     private static array $shared = [];
 
+    /** @var string[] Shared (instances) identifiers */
+    private static array $instances = [];
+
     /** @var array<string, mixed> Resolved singleton instances */
     private static array $resolved = [];
 
@@ -25,6 +28,7 @@ class Container implements ContainerContract
     // Protected helper getters/setters
     // -----------------------------
 
+    // ---------- Bindings Helper function -----------
     protected function bindings(): array
     {
         return static::$bindings;
@@ -35,26 +39,56 @@ class Container implements ContainerContract
         static::$bindings[$abstract] = $concrete;
     }
 
-    protected function shared(): array
+    protected function isBound(string $abstract): bool
     {
-        return static::$shared;
+        return array_key_exists($abstract, static::$bindings);
     }
 
+    protected function unsetBound(string $abstract): void
+    {
+        unset(static::$bindings[$abstract]);
+    }
+
+    // ---------- Shared Helper function -----------
     protected function setShare(string $abstract): void
     {
-        if (!in_array($abstract, static::$shared, true)) {
-            static::$shared[] = $abstract;
-        }
+        static::$shared[$abstract] = $abstract;
     }
 
     protected function isShared(string $abstract): bool
     {
-        return in_array($abstract, static::$shared, true);
+        return array_key_exists($abstract, static::$shared);
     }
 
-    protected function resolved(): array
+    protected function unsetShared(string $abstract): void
     {
-        return static::$resolved;
+        unset(static::$shared[$abstract]);
+    }
+
+    // ---------- Instance Helper function -----------
+    protected function setInstance($abstract): void
+    {
+        static::$instances[$abstract] = $abstract;
+    }
+
+    protected function unsetInstance($abstract): void
+    {
+        unset(static::$instances[$abstract]);
+    }
+
+    protected function isInstance($abstract): bool
+    {
+        return array_key_exists($abstract, static::$instances);
+    }
+
+    // ----------- Resolve Helper function -----------
+    protected function getResolved(string $abstract): object|null
+    {
+        if(! array_key_exists($abstract, static::$resolved)) {
+            return null;
+        }
+
+        return static::$resolved[$abstract];
     }
 
     protected function setResolved(string $abstract, $instance): void
@@ -81,11 +115,7 @@ class Container implements ContainerContract
      */
     public function make(string $abstract, array $parameters = [])
     {
-        if (!array_key_exists($abstract, $this->bindings())) {
-            throw new Exception("Abstract '{$abstract}' is not bound in the container.");
-        }
-
-        return $this->resolve($this->bindings()[$abstract], $abstract, $parameters);
+        return $this->resolve($abstract, $parameters);
     }
 
     /**
@@ -115,12 +145,33 @@ class Container implements ContainerContract
 
         // Handle shared (singleton)
         if ($shared) {
+            $this->unsetSharedInstance($abstract);
             $this->setShare($abstract);
             $this->unsetResolved($abstract);
         }
 
         // If concrete is null, use abstract as concrete
         $this->setBind($abstract, $concrete ?? $abstract);
+    }
+
+    /**
+     * @param string $abstract
+     * @param object $instance
+     * @return object
+     */
+    public function instance($abstract, $instance): object
+    {
+        // Remove abstract from global resolved instance
+        $this->unsetSharedInstance($abstract);
+        //set Instance
+        $this->setInstance($abstract);
+        $this->setResolved($abstract, $instance);
+
+        return $this->getResolved($abstract);
+    }
+
+    public function bound($abstract) {
+        return ($this->isBound($abstract) || $this->isInstance($abstract));
     }
 
     // -----------------------------
@@ -130,17 +181,26 @@ class Container implements ContainerContract
     /**
      * Resolve a concrete implementation
      *
-     * @param \Closure|string $concrete
      * @param string $abstract
      * @param array $parameters Optional constructor parameters
      * @return mixed
      * @throws Exception
      */
-    protected function resolve($concrete, string $abstract, array $parameters = [])
+    protected function resolve($abstract, $parameters = [])
     {
-        // Return previously resolved singleton
-        if ($this->isShared($abstract) && array_key_exists($abstract, $this->resolved())) {
-            return $this->resolved()[$abstract];
+        if (! $this->bound($abstract)) {
+            throw new Exception("Abstract '{$abstract}' is not bound in the container.");
+        }
+
+        if($abstractIsBounded = $this->isBound($abstract)) {
+            $concrete = $this->bindings()[$abstract];
+        }
+
+        $isBoundButNotShared = $abstractIsBounded && ! $this->isShared($abstract);
+
+        // Return singleton|instance
+        if (! $isBoundButNotShared && ! is_null($instance = $this->getResolved($abstract))) {
+            return $instance;
         }
 
         $instance = null;
@@ -179,7 +239,7 @@ class Container implements ContainerContract
      * @return mixed The resolved value returned by the closure.
      * @throws Exception If the first parameter of the closure is type-hinted incorrectly.
      */
-    private function resolveCallback(Closure $concrete, array $parameters)
+    protected function resolveCallback(Closure $concrete, array $parameters)
     {
         $reflection = new ReflectionFunction($concrete);
         $paramCount = $reflection->getNumberOfParameters();
@@ -208,6 +268,17 @@ class Container implements ContainerContract
         }
 
         return $concrete($this, $parameters);
+    }
+
+    protected function unsetSharedInstance($abstract): void
+    {
+        if($this->isShared($abstract)) {
+            $this->unsetBound($abstract);
+        }
+
+        $this->unsetShared($abstract);
+        $this->unsetResolved($abstract);
+        $this->unsetInstance($abstract);
     }
 
     // -----------------------------
