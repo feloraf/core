@@ -163,7 +163,7 @@ class Container implements ContainerContract
         }
 
         // Store resolved singleton
-        if ($this->isShared($abstract)) {
+        if ($this->isShared($abstract) && (is_null($parameters) || empty($parameters))) {
             $this->setResolved($abstract, $instance);
         }
 

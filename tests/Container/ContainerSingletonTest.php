@@ -91,4 +91,34 @@ class ContainerSingletonTest extends TestCase
         $this->assertSame($a, $b);
         $this->assertInstanceOf(Monolog::class, $a->getLogger());
     }
+
+   public function test_singleton_behavior_vs_bind_with_params(): void
+    {
+        // Bind behavior - Not singleton
+        $this->container->singleton('sum', function ($container, $params) {
+            return $params[0] + $params[1];
+        });
+
+        $sumInstance1 = $this->container->make('sum', [1, 2]);
+        $sumInstance2 = $this->container->make('sum', [3, 4]);
+
+        $this->assertNotSame($sumInstance1, $sumInstance2);
+
+        // Real Singleton
+        $this->container->singleton('service', function ($container) {
+            return new SimpleService();
+        });
+
+        // Bind behavior
+        $serviceWithParams1 = $this->container->make('service', [1, 2]);
+        $serviceWithParams2 = $this->container->make('service', [1, 2]);
+
+        $this->assertNotSame($serviceWithParams1, $serviceWithParams2);
+
+        // Singleton behavior
+        $serviceInstance1 = $this->container->make('service');
+        $serviceInstance2 = $this->container->make('service');
+
+        $this->assertSame($serviceInstance1, $serviceInstance2);
+    }
 }
