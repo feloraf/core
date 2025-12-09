@@ -60,22 +60,6 @@ class ContainerBindTest extends TestCase
         $this->container->make('this_does_not_exist');
     }
 
-    public function test_closure_with_typehinted_container_parameter_is_supported(): void
-    {
-        $this->container->bind(Monolog::class, function () {
-            return new Monolog();
-        });
-
-        $this->container->bind(ServiceUsingMonolog::class, function (ContainerContract $c) {
-            return new ServiceUsingMonolog($c->make(Monolog::class));
-        });
-
-        $svc = $this->container->make(ServiceUsingMonolog::class);
-
-        $this->assertInstanceOf(ServiceUsingMonolog::class, $svc);
-        $this->assertInstanceOf(Monolog::class, $svc->logger());
-    }
-
     public function test_binding_can_be_overridden_by_later_bind_call(): void
     {
         $this->container->bind('value', function () {
@@ -127,9 +111,7 @@ class ContainerBindTest extends TestCase
 
     public function test_closure_bind_can_mix_auto_injection_and_params(): void
     {
-        $this->container->bind(SimpleService::class, function () {
-            return new SimpleService();
-        });
+        $this->container->bind(SimpleService::class);
 
         $this->container->bind('complex', function (ContainerContract $c, array $params) {
             $service = $c->make(SimpleService::class);
@@ -170,6 +152,17 @@ class ContainerBindTest extends TestCase
 
         $this->assertTrue($this->container->make('noType'));
     }
+
+    public function test_closure_with_extra_parameters_is_not_allowed(): void
+    {
+        $this->expectExceptionMessage("Too few arguments to function");
+
+        $this->container->bind('extraParams', function ($c, array $params, SimpleService $service) {
+            return $c instanceof ContainerContract;
+        });
+
+        $this->container->make('extraParams', ['name' => 'john doe']);
+    }
 }
 
 interface LoggerInterface {}
@@ -192,21 +185,6 @@ class Logging
 class Concrete
 {
     //
-}
-
-class ServiceUsingMonolog
-{
-    private Monolog $logger;
-
-    public function __construct(Monolog $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    public function logger(): Monolog
-    {
-        return $this->logger;
-    }
 }
 
 class SimpleService
