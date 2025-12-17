@@ -85,4 +85,64 @@ class PathTest extends TestCase
 
         $this->assertEquals([$dir, $file], $this->path->get());
     }
+
+    public function test_assert_dir_and_assert_file_can_be_called_sequentially()
+    {
+        $dir = __DIR__;
+        $file = __FILE__;
+
+        $this->path->on([$dir]);
+        $this->path->assertDir();
+
+        $this->path->on([$file]);
+        $this->path->assertFile();
+
+        $this->assertTrue(true);
+    }
+
+    public function test_assert_file_throws_custom_exception_when_path_is_directory()
+    {
+        $dir = __DIR__;
+
+        $this->expectException(FileException::class);
+
+        $this->path->on([$dir]);
+        $this->path->exception(fn ($path) => throw new FileException());
+        $this->path->assertFile();
+    }
+
+    public function test_assert_dir_throws_custom_exception_when_path_is_file()
+    {
+        $file = __FILE__;
+
+        $this->expectException(DirException::class);
+
+        $this->path->on([$file]);
+        $this->path->exception(fn ($path) => throw new DirException());
+        $this->path->assertDir();
+    }
+
+    public function test_filter_dirs_keeps_only_directory_paths()
+    {
+        $paths = [__DIR__, __FILE__];
+
+        $this->path->on($paths);
+        $this->path->filterDirs();
+
+        $this->assertEquals([__DIR__], $this->path->get());
+    }
+
+    public function test_filter_files_keeps_only_file_paths()
+    {
+        $paths = [__DIR__, __FILE__];
+
+        $this->path->on($paths);
+        $this->path->filterFiles();
+
+        $this->assertEquals([__FILE__], array_values($this->path->get()));
+    }
 }
+
+class DirException extends \Exception {};
+
+class FileException extends \Exception {};
