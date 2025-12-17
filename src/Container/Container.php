@@ -8,7 +8,7 @@ use Felora\Contracts\Container\Container as ContainerContract;
 use ReflectionFunction;
 
 /**
- * Minimal IoC Container (bind, singleton, make)
+ * Minimal IoC Container
  */
 class Container implements ContainerContract
 {
@@ -123,6 +123,7 @@ class Container implements ContainerContract
      *
      * @param string $abstract
      * @param \Closure|string|null $concrete
+     * @return void
      */
     public function singleton(string $abstract, $concrete = null): void
     {
@@ -135,6 +136,7 @@ class Container implements ContainerContract
      * @param string $abstract
      * @param \Closure|string|null $concrete
      * @param bool $shared
+     * @return void
      * @throws Exception
      */
     public function bind(string $abstract, $concrete = null, bool $shared = false): void
@@ -155,9 +157,14 @@ class Container implements ContainerContract
     }
 
     /**
-     * @param string $abstract
-     * @param object $instance
-     * @return object
+     * Register an existing object instance in the container.
+     *
+     * If the given abstract was previously bound as a singleton or instance,
+     * it will be fully removed and replaced with the provided instance.
+     *
+     * @param string $abstract The abstract type or identifier
+     * @param object $instance The concrete instance to bind
+     * @return object The resolved instance from the container
      */
     public function instance($abstract, $instance): object
     {
@@ -170,7 +177,16 @@ class Container implements ContainerContract
         return $this->getResolved($abstract);
     }
 
-    public function bound($abstract) {
+    /**
+     * Determine if the given abstract is bound in the container.
+     *
+     * This includes both normal bindings and instance/singleton bindings.
+     *
+     * @param string $abstract The abstract type or identifier
+     * @return bool True if the abstract is bound or has an instance
+     */
+    public function bound($abstract): bool
+    {
         return ($this->isBound($abstract) || $this->isInstance($abstract));
     }
 
@@ -270,6 +286,13 @@ class Container implements ContainerContract
         return $concrete($this, $parameters);
     }
 
+    /**
+     * This removes an abstract that has been permanently defined
+     * whether as a singleton or a regular instance and etc entirely from the service container.
+     *
+     * @param string $abstract
+     * @return void
+     */
     protected function unsetSharedInstance($abstract): void
     {
         if($this->isShared($abstract)) {
