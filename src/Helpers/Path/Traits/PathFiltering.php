@@ -21,10 +21,7 @@ trait PathFiltering
      */
     public function filterDirs(): PathContract
     {
-        $paths = $this->paths;
-        $this->clean();
-
-        $this->add(array_filter($paths, fn($path) => $this->hasDir($path)));
+        $this->filter($this->paths, fn($path) => $this->hasDir($path));
 
         return $this;
     }
@@ -36,11 +33,15 @@ trait PathFiltering
      */
     public function filterFiles(): PathContract
     {
-        $paths = $this->paths;
-        $this->clean();
-
-        $this->add(array_filter($paths, fn($path) => $this->hasFile($path)));
+        $this->filter($this->paths, fn($path) => $this->hasFile($path));
 
         return $this;
+    }
+
+    protected function filter(array $paths, \Closure $callback): void
+    {
+        $this->clean();
+        $filter = array_filter($paths, $callback);
+        $this->add($filter);
     }
 }
