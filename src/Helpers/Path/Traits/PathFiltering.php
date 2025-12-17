@@ -38,6 +38,20 @@ trait PathFiltering
         return $this;
     }
 
+    /**
+     * Apply a custom filter callback to the given paths array
+     * and replace the internal paths with the filtered result.
+     *
+     * This method clears the current paths and re-adds only the
+     * paths that pass the given callback.
+     *
+     * @param string[] $paths    List of paths to be filtered
+     * @param \Closure(string): bool $callback
+     *        Callback that receives a path and returns true
+     *        if it should be kept, false otherwise.
+     *
+     * @return void
+     */
     protected function filter(array $paths, \Closure $callback): void
     {
         $this->clean();
