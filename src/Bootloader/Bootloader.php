@@ -9,7 +9,7 @@ class Bootloader
 {
     use Registery;
 
-    private ContainerContract $container;
+    protected ContainerContract $container;
 
     public function __construct()
     {
