@@ -13,16 +13,16 @@ use ReflectionFunction;
 class Container implements ContainerContract
 {
     /** @var array<string, \Closure|string> Bindings storage */
-    private static array $bindings = [];
+    private array $bindings = [];
 
     /** @var string[] Shared (singleton) identifiers */
-    private static array $shared = [];
+    private array $shared = [];
 
     /** @var string[] Shared (instances) identifiers */
-    private static array $instances = [];
+    private array $instances = [];
 
     /** @var array<string, mixed> Resolved singleton instances */
-    private static array $resolved = [];
+    private array $resolved = [];
 
     // -----------------------------
     // Protected helper getters/setters
@@ -31,74 +31,74 @@ class Container implements ContainerContract
     // ---------- Bindings Helper function -----------
     protected function bindings(): array
     {
-        return static::$bindings;
+        return $this->bindings;
     }
 
     protected function setBind(string $abstract, $concrete): void
     {
-        static::$bindings[$abstract] = $concrete;
+        $this->bindings[$abstract] = $concrete;
     }
 
     protected function isBound(string $abstract): bool
     {
-        return array_key_exists($abstract, static::$bindings);
+        return array_key_exists($abstract, $this->bindings);
     }
 
     protected function unsetBound(string $abstract): void
     {
-        unset(static::$bindings[$abstract]);
+        unset($this->bindings[$abstract]);
     }
 
     // ---------- Shared Helper function -----------
     protected function setShare(string $abstract): void
     {
-        static::$shared[$abstract] = $abstract;
+        $this->shared[$abstract] = $abstract;
     }
 
     protected function isShared(string $abstract): bool
     {
-        return array_key_exists($abstract, static::$shared);
+        return array_key_exists($abstract, $this->shared);
     }
 
     protected function unsetShared(string $abstract): void
     {
-        unset(static::$shared[$abstract]);
+        unset($this->shared[$abstract]);
     }
 
     // ---------- Instance Helper function -----------
     protected function setInstance($abstract): void
     {
-        static::$instances[$abstract] = $abstract;
+        $this->instances[$abstract] = $abstract;
     }
 
     protected function unsetInstance($abstract): void
     {
-        unset(static::$instances[$abstract]);
+        unset($this->instances[$abstract]);
     }
 
     protected function isInstance($abstract): bool
     {
-        return array_key_exists($abstract, static::$instances);
+        return array_key_exists($abstract, $this->instances);
     }
 
     // ----------- Resolve Helper function -----------
-    protected function getResolved(string $abstract): object|null
+    protected function getResolved(string $abstract): mixed
     {
-        if(! array_key_exists($abstract, static::$resolved)) {
+        if(! array_key_exists($abstract, $this->resolved)) {
             return null;
         }
 
-        return static::$resolved[$abstract];
+        return $this->resolved[$abstract];
     }
 
     protected function setResolved(string $abstract, $instance): void
     {
-        static::$resolved[$abstract] = $instance;
+        $this->resolved[$abstract] = $instance;
     }
 
     protected function unsetResolved(string $abstract): void
     {
-        unset(static::$resolved[$abstract]);
+        unset($this->resolved[$abstract]);
     }
 
     // -----------------------------
