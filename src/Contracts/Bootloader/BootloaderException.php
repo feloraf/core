@@ -1,5 +1,5 @@
 <?php
-namespace Felora\Bootloader;
+namespace Felora\Contracts\Bootloader;
 
 class BootloaderException extends \Exception
 {

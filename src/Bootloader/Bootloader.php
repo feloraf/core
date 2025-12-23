@@ -3,6 +3,7 @@ namespace Felora\Bootloader;
 
 use Felora\Bootloader\Traits\Registery;
 use Felora\Container\Container;
+use Felora\Contracts\Bootloader\BootloaderException;
 use Felora\Contracts\Container\Container as ContainerContract;
 
 class Bootloader

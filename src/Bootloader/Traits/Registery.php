@@ -1,7 +1,7 @@
 <?php
 namespace Felora\Bootloader\Traits;
 
-use Felora\Bootloader\BootloaderException;
+use Felora\Contracts\Bootloader\BootloaderException;
 use Felora\Helpers\Path\Path;
 use Felora\Support\ConfigManager;
 use Felora\Contracts\Helpers\Path\Path as PathContract;
