@@ -5,6 +5,7 @@ use Felora\Bootloader\Traits\Registery;
 use Felora\Container\Container;
 use Felora\Contracts\Bootloader\BootloaderException;
 use Felora\Contracts\Container\Container as ContainerContract;
+use Felora\Contracts\Support\AppPaths;
 
 class Bootloader
 {
@@ -23,11 +24,48 @@ class Bootloader
     {
         $this->register();
 
-        if (!method_exists($this, 'server')) {
-            throw new BootloaderException('Bootloader requires the "server" method to be implemented.');
+        /** @var Path $apps */
+        $apps = $this->container->make(AppPaths::class);
+
+        $entrypoints = array_map(fn($path) => $path . DIRECTORY_SEPARATOR . 'index.php', $apps->get());
+
+        $entrypoints = $apps->on($entrypoints)
+            ->exception(fn($file) => throw new BootloaderException("The file [{$file}] does not exist."))
+            ->assertFile()
+            ->get();
+
+        pcntl_async_signals(true);
+
+        $pids = [];
+
+        pcntl_signal(SIGTERM, function () use (&$pids) {
+            foreach ($pids as $pid) {
+                if ($pid > 0) {
+                    posix_kill($pid, SIGTERM);
+                }
+            }
+
+            exit(0);
+        });
+
+        foreach ($entrypoints as $entrypoint) {
+            $pid = pcntl_fork();
+
+            if ($pid === -1) {
+                throw new BootloaderException("Unable to fork process for entrypoint: [{$entrypoint}].");
+            }
+
+            if ($pid === 0) {
+                require_once $entrypoint;
+                exit(0);
+            }
+
+            $pids[] = $pid;
         }
 
-        $this->server();
+        while (true) {
+            sleep(1);
+        }
     }
 
     private function configPath(): string
