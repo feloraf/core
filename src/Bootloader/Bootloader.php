@@ -20,6 +20,11 @@ class Bootloader
         $this->handle();
     }
 
+    protected function setConfig(): string
+    {
+        throw new BootloaderException('Bootloader requires the "setConfig" method to be implemented.');
+    }
+
     private function handle(): void
     {
         $this->register();
@@ -70,10 +75,6 @@ class Bootloader
 
     private function configPath(): string
     {
-        if (!method_exists($this, 'setConfig')) {
-            throw new BootloaderException('Bootloader requires the "setConfig" method to be implemented.');
-        }
-
         return $this->setConfig();
     }
 }
