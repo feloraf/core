@@ -1,15 +1,15 @@
 <?php
 namespace Felora\Bootloader;
 
-use Felora\Bootloader\Traits\Registery;
 use Felora\Container\Container;
+use Felora\Contracts\App\AppPaths;
+use Felora\Bootloader\traits\Bootstraping;
 use Felora\Contracts\Bootloader\BootloaderException;
 use Felora\Contracts\Container\Container as ContainerContract;
-use Felora\Contracts\App\AppPaths;
 
 class Bootloader
 {
-    use Registery;
+    use Bootstraping;
 
     protected ContainerContract $container;
 
@@ -20,15 +20,22 @@ class Bootloader
         $this->handle();
     }
 
-    protected function setConfig(): string
+    protected function base(): string
     {
         throw new BootloaderException('Bootloader requires the "setConfig" method to be implemented.');
     }
 
     private function handle(): void
     {
-        $this->register();
+        $this->container->singleton('base', fn() => $this->base());
 
+        $this->loadBootstraps();
+
+        $this->loadApps();
+    }
+
+    private function loadApps(): void
+    {
         /** @var Path $apps */
         $apps = $this->container->make(AppPaths::class);
 
@@ -71,10 +78,5 @@ class Bootloader
         while (true) {
             sleep(1);
         }
-    }
-
-    private function configPath(): string
-    {
-        return $this->setConfig();
     }
 }
