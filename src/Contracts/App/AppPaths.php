@@ -1,6 +1,6 @@
 <?php
 
-namespace Felora\Contracts\Support;
+namespace Felora\Contracts\App;
 
 interface AppPaths
 {

@@ -2,9 +2,9 @@
 namespace Felora\Bootloader\Traits;
 
 use Felora\Contracts\Bootloader\BootloaderException;
-use Felora\Helpers\Path\Path;
+use Felora\Filesystem\Path;
 use Felora\Support\ConfigManager;
-use Felora\Contracts\Helpers\Path\Path as PathContract;
+use Felora\Contracts\Filesystem\Path as PathContract;
 use Felora\Contracts\Support\ConfigManager as ConfigManagerContract;
 use Felora\Contracts\Support\ConfigManagerException;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Felora\Contracts\Helpers\Path;
+namespace Felora\Contracts\Filesystem;
 
 use Closure;
 
@@ -11,7 +11,7 @@ use Closure;
  * Provides methods to manage a list of file system paths,
  * check their existence and type, filter them, and traverse directories.
  *
- * @package Felora\Contracts\Helpers
+ * @package Felora\Contracts\Filesystem
  */
 interface Path
 {

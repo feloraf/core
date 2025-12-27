@@ -1,9 +1,9 @@
 <?php
 
-namespace Felora\Helpers\Path\Traits;
+namespace Felora\Filesystem\Traits;
 
 use RuntimeException;
-use Felora\Contracts\Helpers\Path\Path as PathContract;
+use Felora\Contracts\Filesystem\Path as PathContract;
 
 trait PathValidation
 {

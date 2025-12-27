@@ -2,8 +2,8 @@
 declare(strict_types=1);
 
 use Tests\TestCase;
-use Felora\Helpers\Path\Path;
-use Felora\Contracts\Helpers\Path\Path as PathContract;
+use Felora\Filesystem\Path;
+use Felora\Contracts\Filesystem\Path as PathContract;
 
 class PathTest extends TestCase
 {

@@ -3,8 +3,8 @@
 namespace Tests\Path;
 
 use Tests\TestCase;
-use Felora\Helpers\Path\PathScanner;
-use Felora\Contracts\Helpers\Path\PathIteratorException;
+use Felora\Filesystem\PathScanner;
+use Felora\Contracts\Filesystem\PathIteratorException;
 use SplFileInfo;
 
 class PathScannerTest extends TestCase

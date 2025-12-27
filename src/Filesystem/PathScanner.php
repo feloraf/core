@@ -1,13 +1,13 @@
 <?php
 
-namespace Felora\Helpers\Path;
+namespace Felora\Filesystem;
 
 use CallbackFilterIterator;
 use Iterator;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use RecursiveCallbackFilterIterator;
-use Felora\Contracts\Helpers\Path\PathIteratorException;
+use Felora\Contracts\Filesystem\PathIteratorException;
 use SplFileInfo;
 
 /**
@@ -18,7 +18,7 @@ use SplFileInfo;
  * Provides options to scan only files, only directories, or both, and to restrict scanning
  * to a specific depth or current level.
  *
- * @package Felora\Helpers\Path
+ * @package Felora\Filesystem
  */
 class PathScanner
 {

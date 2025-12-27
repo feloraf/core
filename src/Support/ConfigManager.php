@@ -3,9 +3,9 @@
 namespace Felora\Support;
 
 use Felora\Contracts\Container\Container;
-use Felora\Contracts\Helpers\Path\Path;
+use Felora\Contracts\Filesystem\Path;
 use Felora\Contracts\Runtime\Runtime;
-use Felora\Contracts\Support\AppPaths;
+use Felora\Contracts\App\AppPaths;
 use Felora\Contracts\Support\ConfigManager as SupportManagerLoader;
 use Felora\Contracts\Support\ConfigManagerException;
 use ReflectionClass;

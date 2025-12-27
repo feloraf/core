@@ -1,8 +1,8 @@
 <?php
 
-namespace Felora\Helpers\Path\Traits;
+namespace Felora\Filesystem\Traits;
 
-use Felora\Contracts\Helpers\Path\Path as PathContract;
+use Felora\Contracts\Filesystem\Path as PathContract;
 
 /**
  * Trait PathFilter
@@ -10,7 +10,7 @@ use Felora\Contracts\Helpers\Path\Path as PathContract;
  * Provides convenient methods to filter the stored paths array
  * to include only directories or only files.
  *
- * @package Felora\Helpers\Path\Traits
+ * @package Felora\Filesystem\Traits
  */
 trait PathFiltering
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Felora\Contracts\Helpers\Path;
+namespace Felora\Contracts\Filesystem;
 
 use RuntimeException;
 

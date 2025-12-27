@@ -1,18 +1,18 @@
 <?php
 
-namespace Felora\Helpers\Path;
+namespace Felora\Filesystem;
 
 use Closure;
-use Felora\Contracts\Helpers\Path\Path as PathContract;
-use Felora\Helpers\Path\Traits\PathFiltering;
-use Felora\Helpers\Path\Traits\PathValidation;
+use Felora\Contracts\Filesystem\Path as PathContract;
+use Felora\Filesystem\Traits\PathFiltering;
+use Felora\Filesystem\Traits\PathValidation;
 
 /**
  * Class Path
  *
  * A utility class for managing and interacting with file system paths.
  *
- * @package Felora\Helpers\Path
+ * @package Felora\Filesystem
  */
 class Path implements PathContract
 {
