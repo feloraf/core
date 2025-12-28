@@ -31,7 +31,7 @@ class Path implements PathContract
      *
      * @var Closure|null
      */
-    private Closure|null $exception = null;
+    private ?Closure $exception = null;
 
     /**
      * Path constructor.
