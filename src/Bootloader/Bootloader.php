@@ -1,80 +1,40 @@
 <?php
 namespace Felora\Bootloader;
 
-use Felora\Bootloader\Traits\Registery;
-use Felora\Container\Container;
+use Felora\Bootstrap\Bootstrap;
 use Felora\Contracts\Bootloader\BootloaderException;
-use Felora\Contracts\Container\Container as ContainerContract;
-use Felora\Contracts\App\AppPaths;
+use Felora\Foundation\Bootstrap\LoadApplications;
 
-class Bootloader
+/**
+ * @method setUp()
+ * @method setDown()
+ */
+class Bootloader extends Bootstrap
 {
-    use Registery;
-
-    protected ContainerContract $container;
-
     public function __construct()
     {
-        $this->container = new Container;
-
         $this->handle();
     }
 
-    protected function setConfig(): string
+    protected function base(): string
     {
         throw new BootloaderException('Bootloader requires the "setConfig" method to be implemented.');
     }
 
     private function handle(): void
     {
-        $this->register();
+        $this->singleton('base', fn() => $this->base());
 
-        /** @var Path $apps */
-        $apps = $this->container->make(AppPaths::class);
-
-        $entrypoints = array_map(fn($path) => $path . DIRECTORY_SEPARATOR . 'index.php', $apps->get());
-
-        $entrypoints = $apps->on($entrypoints)
-            ->exception(fn($file) => throw new BootloaderException("The file [{$file}] does not exist."))
-            ->assertFile()
-            ->get();
-
-        pcntl_async_signals(true);
-
-        $pids = [];
-
-        pcntl_signal(SIGTERM, function () use (&$pids) {
-            foreach ($pids as $pid) {
-                if ($pid > 0) {
-                    posix_kill($pid, SIGTERM);
-                }
-            }
-
-            exit(0);
-        });
-
-        foreach ($entrypoints as $entrypoint) {
-            $pid = pcntl_fork();
-
-            if ($pid === -1) {
-                throw new BootloaderException("Unable to fork process for entrypoint: [{$entrypoint}].");
-            }
-
-            if ($pid === 0) {
-                require_once $entrypoint;
-                exit(0);
-            }
-
-            $pids[] = $pid;
+        if(function_exists('setUp')) {
+            $this->setUp();
         }
 
-        while (true) {
-            sleep(1);
-        }
-    }
+        $this->loadBootstraps();
 
-    private function configPath(): string
-    {
-        return $this->setConfig();
+        $this->withBootstrap(LoadApplications::class);
+
+        if(function_exists('setDown')) {
+            $this->setDown();
+        }
     }
 }
