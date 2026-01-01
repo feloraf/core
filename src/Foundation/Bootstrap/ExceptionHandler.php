@@ -10,11 +10,11 @@ class ExceptionHandler implements Bootstrap
 {
     public function bootstrap(Container $container): void
     {
-        set_error_handler($this->forwardTo('errorHandler'));
-        //
-        set_exception_handler($this->forwardTo('exceptionHandler'));
-        //
-        register_shutdown_function($this->forwardTo('registerShutdown'));
+        // set_error_handler($this->forwardTo('errorHandler'));
+
+        // set_exception_handler($this->forwardTo('exceptionHandler'));
+
+        // register_shutdown_function($this->forwardTo('registerShutdown'));
     }
 
     protected function forwardTo(string $method): Closure

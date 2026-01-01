@@ -80,6 +80,16 @@ class Bootstrap extends Container
     }
 
     /**
+     * Load and execute all bootstraps in the defined order.
+     */
+    public function loadBootstraps(): void
+    {
+        foreach ($this->bootstraps as $bootstrap) {
+            $this->fire((string) $bootstrap);
+        }
+    }
+
+    /**
      * Fire the "bootstrapping" callback before executing a bootstrap.
      *
      * @param string $bootstrapClass
@@ -120,15 +130,5 @@ class Bootstrap extends Container
         $this->instance($bootstrap, $instance);
 
         $this->bootstrappedFire($instance);
-    }
-
-    /**
-     * Load and execute all bootstraps in the defined order.
-     */
-    protected function loadBootstraps(): void
-    {
-        foreach ($this->bootstraps as $bootstrap) {
-            $this->fire((string) $bootstrap);
-        }
     }
 }

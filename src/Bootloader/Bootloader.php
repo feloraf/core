@@ -24,7 +24,7 @@ class Bootloader extends Bootstrap
 
     private function handle(): void
     {
-        $this->singleton('base', fn() => $this->base());
+        define('BASE', $this->base()); 
 
         if(function_exists('setUp')) {
             $this->setUp();
