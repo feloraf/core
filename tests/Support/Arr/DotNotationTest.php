@@ -133,25 +133,24 @@ class DotNotationTest extends TestCase
             'db' => [
                 'connections' => [
                     'mysql' => [
-                            'abas' => [
-                                'ahmad' => 'reza',
-                            ],
+                        'host' => '127.0.0.1',
                         'port' => 3306
                     ],
                     'pgsql' => [
-                            'aa' => [
-                                'ahmad' => 'reza',
-                            ],
+                        'host' => '0.0.0.0',
                         'port' => 5432
                     ],
                 ],
             ],
         ];
 
-        $result = $this->dot->get($array, 'db.connections.*.*.ahmad');
-        dd($result);
+        dd($this->dot->get($array, 'db.*.*.*'));
 
-        $this->assertEquals([3306, 5432], $result);
+        $except = [3306, 5432];
+        $this->assertEquals($except, $this->dot->get($array, 'db.connections.*.port'), '+++++');
+        $this->assertEquals($except, $this->dot->get($array, 'db.*.*.port'), '))))))');
+        $this->assertEquals($except, dd($this->dot->get($array, 'db.*.*.*')), '<<<<<<<<');
+        // $this->assertEquals($except, $this->dot->get($array, '*.*.*.*'), '>>>>>>>>');
     }
 
     public function test_get_with_empty_array(): void

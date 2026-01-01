@@ -6,6 +6,20 @@ class DotNotation
 {
     const SEPORATOR='.';
 
+    public function split(string $key): array
+    {
+        $segments = explode(self::SEPORATOR, $key);
+
+        return $segments;
+    }
+
+    public function join(array $remainingSegments): string
+    {
+        $key = implode(self::SEPORATOR, $remainingSegments);
+
+        return $key;
+    }
+
     public function set(array &$array, string $key, mixed $value): void
     {
         if($key == '') {
@@ -33,42 +47,25 @@ class DotNotation
 
     public function get(array $array, string $key)
     {
-        $keys = explode($this::SEPORATOR, $key);
+        $segments = $this->split($key);
 
-        $current = $array;
+        foreach ($segments as $index => $segment) {
 
-        foreach($keys as $segment_key => $segment) {
-
-            unset($keys[$segment_key]);
-
-            if(isset($current[$segment])) {
-                $current = &$current[$segment];
-
-                continue;
+            if ($segment === '*') {
+                return $this->handleWildcard(
+                    $array,
+                    $this->join(array_slice($segments, $index + 1))
+                );
             }
 
-            if($segment === '*') {
-                $result = [];
-                $key = implode($this::SEPORATOR, $keys);
-                foreach($current as $_segment) {
-                    if(! is_array($_segment)) {
-                        continue;
-                    }
-
-                    $result[] = $this->get($_segment, $key);
-                }
-
-                $current = $result;
-
-                break;
+            if (! is_array($array) || ! array_key_exists($segment, $array)) {
+                return null;
             }
 
-            $current = null;
-
-            break;
+            $array = $array[$segment];
         }
 
-        return $current;
+        return $array;
     }
 
     public function has()
@@ -109,5 +106,34 @@ class DotNotation
     public function expand()
     {
         //
+    }
+
+    protected function handleWildcard(array $array, string $key): array
+    {
+        $result = [];
+
+        foreach ($array as $item) {
+            $nestedResult = $key === ''
+                ? $item
+                : $this->get($item, $key);
+
+            if( is_array($nestedResult)
+                && count($nestedResult)           === 1 
+                && array_key_first($nestedResult) === 0
+                && is_array(array_shift($array))) {
+                //
+                $nestedResult = array_shift(array_values($nestedResult));
+            }
+
+            if(is_array($nestedResult)) {
+                $result = $nestedResult;
+
+                continue;
+            }
+
+            $result[] = $nestedResult;
+        }
+
+        return $result;
     }
 }
