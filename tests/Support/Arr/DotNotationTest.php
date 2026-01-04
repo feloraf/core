@@ -650,13 +650,40 @@ class DotNotationTest extends TestCase
     public function test_forgot_with_wildcard_on_numeric_array(): void
     {
         $array = [
-            'ports' => [8893, 9054],
+            'ports' => [
+                8893,
+                9054,
+            ],
         ];
 
         $this->dot->forgot($array, 'ports.*');
 
         $this->assertSame([
             'ports' => [],
+        ], $array);
+    }
+
+    public function test_x(): void
+    {
+        $array = [
+            'ports' => [
+                8893,
+                'ports' => [
+                    8080,
+                    2020
+                ],
+                9054,
+            ],
+        ];
+
+        $this->dot->forgot($array, 'ports.*.*');
+
+        $this->assertSame([
+            'ports' => [
+                8893,
+                'ports' => [],
+                9054,
+            ],
         ], $array);
     }
 

@@ -56,7 +56,7 @@ class DotNotation
         foreach ($segments as $index => $segment) {
 
             if ($segment === '*') {
-                return $this->handleWildcard(
+                return $this->getWithWildCard(
                     $array,
                     array_slice($segments, $index + 1)
                 );
@@ -79,29 +79,9 @@ class DotNotation
 
     public function forgot(array &$array, string $key): void
     {
-        $keys = $this->split($key);
+        $segments = $this->split($key);
 
-        array_walk($keys, function ($segment, $index) use (&$array, &$keys) {
-            if(! array_key_exists($segment, $array)) {
-                return;
-            }
-
-            unset($keys[$index]);
-
-            if($segment === '*') {
-                $this->forgot($array[$segment], $this->join($keys));
-
-                return;
-            }
-
-            if(is_array($array[$segment])) {
-                $this->forgot($array[$segment], $this->join($keys));
-
-                return;
-            }
-
-            unset($array[$segment]);
-        });
+        $this->forgetRecursive($array, $segments);
     }
 
     public function search()
@@ -133,7 +113,53 @@ class DotNotation
         return array_values($this->flatten($array));
     }
 
-    protected function handleWildcard(array $array, array $segments): array
+    protected function forgetRecursive(array &$array, array $segments): void
+    {
+        if (empty($segments)) {
+            return;
+        }
+
+        $segment = array_shift($segments);
+
+        if ($segment === '*') {
+            $this->forgetWithWildcard($array, $segments);
+            return;
+        }
+
+        if (! array_key_exists($segment, $array)) {
+            return;
+        }
+
+        if (is_array($array[$segment]) && ! empty($segments)) {
+            $this->forgetRecursive($array[$segment], $segments);
+            return;
+        }
+
+        $this->removeKey($array, $segment);
+    }
+
+    protected function forgetWithWildcard(array &$array, array $segments): void
+    {
+        foreach ($array as $key => &$value) {
+
+            if (is_array($value)) {
+                $this->forgetRecursive($value, $segments);
+
+                continue;
+            }
+
+            if (empty($segments)) {
+                $this->removeKey($array, $key);
+            }
+        }
+    }
+
+    protected function removeKey(array &$array, string|int $key): void
+    {
+        unset($array[$key]);
+    }
+
+    protected function getWithWildCard(array $array, array $segments): array
     {
         $result = [];
 
