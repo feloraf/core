@@ -208,35 +208,7 @@ class Container implements ContainerContract
             throw new Exception("Abstract '{$abstract}' is not bound in the container.");
         }
 
-        if($abstractIsBounded = $this->isBound($abstract)) {
-            $concrete = $this->bindings()[$abstract];
-        }
-
-        $isBoundButNotShared = $abstractIsBounded && ! $this->isShared($abstract);
-
-        // Return singleton|instance
-        if (! $isBoundButNotShared && ! is_null($instance = $this->getResolved($abstract))) {
-            return $instance;
-        }
-
-        $instance = null;
-
-        if (is_callable($concrete)) {
-            // Execute closure with container passed
-            $instance = $this->resolveCallback($concrete, $parameters);
-        } elseif (is_string($concrete)) {
-            if (!class_exists($concrete)) {
-                // Concrete is a string value, return as-is
-                $instance = $concrete;
-            } else {
-                // Instantiate class (no auto-wiring yet)
-                $instance = empty($parameters)
-                    ? new $concrete()
-                    : new $concrete(...$parameters);
-            }
-        } else {
-            throw new Exception("Concrete for abstract '{$abstract}' must be a string or closure.");
-        }
+        $instance = $this->getInstance($parameters, $abstract);
 
         // Store resolved singleton
         if ($this->isShared($abstract) && (is_null($parameters) || empty($parameters))) {
@@ -244,6 +216,45 @@ class Container implements ContainerContract
         }
 
         return $instance;
+    }
+
+    protected function getInstance($parameters, $abstract)
+    {
+        $abstractIsBounded = $this->isBound($abstract);
+
+        if($abstractIsBounded) {
+            $concrete = $this->bindings()[$abstract];
+        }
+
+        $isBoundButNotShared = $abstractIsBounded && ! $this->isShared($abstract);
+
+        // Return singleton|instance
+        if (! $isBoundButNotShared) {
+            $instance = $this->getResolved($abstract);
+
+            if(! is_null($instance)) {
+                return $instance;
+            }
+        }
+
+        if (is_callable($concrete)) {
+            // Execute closure with container passed
+            return $this->resolveCallback($concrete, $parameters);
+        }
+
+        if (is_string($concrete) && ! class_exists($concrete)) {
+            // Concrete is a string value, return as-is
+            return $concrete;
+        }
+
+        if(is_string($concrete)) {
+            // Instantiate class (no auto-wiring yet)
+            return empty($parameters)
+                ? new $concrete()
+                : new $concrete(...$parameters);
+        }
+
+        throw new Exception("Concrete for abstract '{$abstract}' must be a string or closure.");
     }
 
     /**
