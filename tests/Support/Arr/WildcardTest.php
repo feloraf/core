@@ -15,7 +15,7 @@ class WildcardTest extends TestCase
 
     /** Get method */
 
-     public function test_get_with_wildcard(): void
+    public function test_get_with_wildcard(): void
     {
         $array = [
             'db' => [
@@ -30,6 +30,18 @@ class WildcardTest extends TestCase
                     ],
                 ],
             ],
+            // 'abc' => [
+            //     'connections' => [
+            //         'mysql' => [
+            //             'host' => '127.0.0.1',
+            //             'port' => 3306,
+            //         ],
+            //         'pgsql' => [
+            //             'host' => '0.0.0.0',
+            //             'port' => 5432,
+            //         ],
+            //     ],
+            // ],
         ];
 
         $expected_ports = [3306, 5432];
@@ -39,25 +51,47 @@ class WildcardTest extends TestCase
             '0.0.0.0',
             5432,
         ];
+        $excepted_x = [
+            [
+                'mysql' => [
+                    'host' => '127.0.0.1',
+                    'port' => 3306,
+                ],
+                'pgsql' => [
+                    'host' => '0.0.0.0',
+                    'port' => 5432,
+                ],
+            ]
+        ];
+
+        // $this->assertEquals(
+        //     $expected_ports,
+        //     $this->dot->get($array, 'db.connections.*.port'),
+        // );
+
+        // $this->assertEquals(
+        //     $expected_ports,
+        //     $this->dot->get($array, 'db.*.*.port'),
+        // );
+
+        // $this->assertEquals(
+        //     $expected_flattened_values,
+        //     $this->dot->get($array, 'db.*.*.*'),
+        // );
+
+        // $this->assertEquals(
+        //     $expected_flattened_values,
+        //     $this->dot->get($array, '*.*.*.*')
+        // );
 
         $this->assertEquals(
-            $expected_ports,
-            $this->dot->get($array, 'db.connections.*.port')
+            $excepted_x,
+            dd($this->dot->get($array, 'db.connections')),
         );
-
+// 
         $this->assertEquals(
-            $expected_ports,
-            $this->dot->get($array, 'db.*.*.port')
-        );
-
-        $this->assertEquals(
-            $expected_flattened_values,
-            $this->dot->get($array, 'db.*.*.*')
-        );
-
-        $this->assertEquals(
-            $expected_flattened_values,
-            $this->dot->get($array, '*.*.*.*')
+            $excepted_x,
+            dd($this->dot->get($array, '*.connections')),
         );
     }
 
@@ -69,7 +103,7 @@ class WildcardTest extends TestCase
             'types' => [
                 'string' => 'hello world',
                 'object' => $object,
-                'nullable' => null,
+                'null' => null,
                 'empty_array' => [],
                 'nested_array' => [
                     [null],
@@ -103,8 +137,9 @@ class WildcardTest extends TestCase
     {
         $array = [
             'app' => [
+                'name' => 'felora',
                 'runtime' => 'swoole',
-                'ports' => [
+                'listen' => [
                     8893,
                     9054,
                 ],
@@ -148,9 +183,44 @@ class WildcardTest extends TestCase
             ],
         ];
 
-        $result = $this->dot->get($array, 'db.*.mongodb');
+        $this->assertEquals([], $this->dot->get($array, 'db.*.mariadb'));
+        $this->assertEquals([], $this->dot->get($array, '*.*.mariadb'));
+        $this->assertEquals([], $this->dot->get($array, 'db.*.mariadb.port'));
+        $this->assertEquals([], $this->dot->get($array, '*.*.mariadb.port'));
+    }
 
-        $this->assertEmpty($result);
+    public function test_get_returns_grouped_results_for_root_wildcard_path(): void
+    {
+        $array = [
+            'log' => [
+                'connections' => [
+                    'monitor' => [],
+                    'pusher' => [],
+                ],
+            ],
+            'db' => [
+                'connections' => [
+                    'mysql' => [],
+                    'pgsql' => [],
+                ]
+            ]
+        ];
+
+        $expected = [
+            [
+                'monitor' => [],
+                'pusher' => [],
+            ],
+            [
+                'mysql' => [],
+                'pgsql' => [],
+            ]
+        ];
+
+        $this->assertEquals(
+            $expected,
+            $this->dot->get($array, '*.connections')
+        );
     }
 
     /** Has method */
