@@ -1,0 +1,36 @@
+name: PHPMD Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  phpmd:
+    if: "!contains(github.event.head_commit.message, 'Merge pull request')"
+    name: Run PHPMD
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup PHP (8.4)
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.4
+
+      # Install wget if missing (for phpmd.phar download)
+      - name: Install wget
+        run: sudo apt-get update && sudo apt-get install -y wget
+
+      # Run your workflow.sh
+      - name: Run PHPMD
+        run: ./tools/workflow.sh
